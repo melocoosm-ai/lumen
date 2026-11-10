@@ -46,6 +46,8 @@ console.log('ok  omnibox resolution');
 app.whenReady().then(async () => {
   try {
     await until(() => t.snapshot().tabs.length === 1);
+    // Wait for the new-tab page to finish loading, so its reported URL is the one Chromium settled on.
+    await until(() => { const wc = t.tab(t.snapshot().activeId).view.webContents; return !wc.isLoading() && wc.getURL() !== ''; });
     let s = t.snapshot();
     assert.equal(s.tabs[0].url, '', 'first tab is the new-tab page');
     await shot('1-newtab');

@@ -9,13 +9,16 @@
 // helper processes are spawned the same way Chromium does it.
 
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 const { app, BaseWindow, WebContentsView, Menu, ipcMain, nativeTheme, shell } = require('electron');
 
 const isMac = process.platform === 'darwin';
 const TABSTRIP_HEIGHT = 38;
 
 const CHROME_HEIGHT = 80; // tab strip (38) + toolbar (42)
-const NEW_TAB_URL = `file://${path.join(__dirname, 'ui', 'newtab.html')}`;
+// pathToFileURL gives the same form Chromium reports after loading (file:///D:/..., spaces as %20),
+// so the new-tab page is recognised on Windows and in folders with spaces.
+const NEW_TAB_URL = pathToFileURL(path.join(__dirname, 'ui', 'newtab.html')).href;
 const SEARCH_URL = 'https://duckduckgo.com/?q=';
 
 let win;
