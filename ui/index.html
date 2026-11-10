@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src * data:; style-src 'self'">
+  <title>Lumen</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+  <div id="tabstrip">
+    <div id="tabs" role="tablist"></div>
+    <button id="newtab" class="icon" title="New tab (⌘T)" aria-label="New tab">
+      <svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>
+    </button>
+  </div>
+  <div id="toolbar">
+    <button id="back" class="icon" title="Back (⌘[)" aria-label="Back">
+      <svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg>
+    </button>
+    <button id="forward" class="icon" title="Forward (⌘])" aria-label="Forward">
+      <svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg>
+    </button>
+    <button id="reload" class="icon" title="Reload (⌘R)" aria-label="Reload">
+      <svg class="r" viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3"/></svg>
+      <svg class="x" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+    </button>
+    <form id="omnibox-form">
+      <span id="lock" aria-hidden="true"></span>
+      <input id="omnibox" type="text" spellcheck="false" autocomplete="off"
+             placeholder="Search or enter address" aria-label="Address and search bar">
+    </form>
+  </div>
+  <script src="ui.js"></script>
+</body>
+</html>

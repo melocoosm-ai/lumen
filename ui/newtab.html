@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+  <title>New Tab</title>
+  <style>
+    :root { --bg:#f6f7f9; --card:#fff; --text:#1f2328; --muted:#5f6670; --accent:#6b4fd8; --line:#e3e6ea; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#1f2126; --card:#2a2d33; --text:#e8eaed; --muted:#9aa0a8; --accent:#a593ff; --line:#3a3e45; }
+    }
+    html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
+      font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    main { min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; padding:24px; box-sizing:border-box; }
+    .mark { display:flex; align-items:center; gap:12px; font-size:34px; font-weight:650; letter-spacing:-.5px; }
+    .dot { width:34px; height:34px; border-radius:50%; background:radial-gradient(circle at 35% 35%, #ffd76a, var(--accent) 70%); }
+    p { margin:0; color:var(--muted); }
+    .tiles { display:grid; grid-template-columns:repeat(4, 112px); gap:12px; }
+    @media (max-width: 560px) { .tiles { grid-template-columns:repeat(2, 112px); } }
+    a { text-decoration:none; color:inherit; background:var(--card); border:1px solid var(--line); border-radius:12px;
+        height:84px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+    a:hover { border-color:var(--accent); }
+    a b { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--accent); color:#fff; font-size:14px; }
+    a span { font-size:12.5px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="mark"><div class="dot"></div>Lumen</div>
+    <p>Type in the address bar to search or go to a site.</p>
+    <nav class="tiles">
+      <a href="https://en.wikipedia.org"><b>W</b><span>Wikipedia</span></a>
+      <a href="https://github.com"><b>G</b><span>GitHub</span></a>
+      <a href="https://news.ycombinator.com"><b>Y</b><span>Hacker News</span></a>
+      <a href="https://developer.mozilla.org"><b>M</b><span>MDN</span></a>
+    </nav>
+  </main>
+</body>
+</html>

@@ -1,0 +1,96 @@
+:root {
+  --strip: #dfe3e8;
+  --toolbar: #ffffff;
+  --tab-hover: #eceff2;
+  --text: #1f2328;
+  --muted: #5f6670;
+  --field: #eef1f4;
+  --field-focus: #ffffff;
+  --accent: #6b4fd8;
+  --line: #d3d8de;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --strip: #1b1d22;
+    --toolbar: #2a2d33;
+    --tab-hover: #24272c;
+    --text: #e8eaed;
+    --muted: #9aa0a8;
+    --field: #1d1f24;
+    --field-focus: #1d1f24;
+    --accent: #a593ff;
+    --line: #3a3e45;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 80px; overflow: hidden; user-select: none;
+  font: 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color: var(--text); background: var(--strip);
+}
+button { font: inherit; color: inherit; }
+
+/* ---- tab strip (draggable title bar) ---- */
+#tabstrip {
+  height: 38px; display: flex; align-items: flex-end; padding: 0 8px 0 80px;
+  -webkit-app-region: drag;
+}
+#tabs { display: flex; min-width: 0; flex: 0 1 auto; height: 32px; }
+.tab {
+  -webkit-app-region: no-drag;
+  position: relative; display: flex; align-items: center; gap: 8px;
+  width: 220px; min-width: 56px; flex: 0 1 220px; height: 32px; padding: 0 6px 0 12px;
+  border-radius: 9px 9px 0 0; cursor: default; color: var(--muted);
+}
+.tab:hover { background: var(--tab-hover); }
+.tab.active { background: var(--toolbar); color: var(--text); }
+.tab + .tab:not(.active):not(:hover)::before {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: var(--line);
+}
+.tab.active + .tab::before, .tab:hover + .tab::before { display: none; }
+.favicon { width: 16px; height: 16px; flex: none; border-radius: 3px; }
+.favicon.placeholder { background: var(--line); }
+.spinner {
+  width: 14px; height: 14px; flex: none; margin: 1px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--accent);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.close {
+  flex: none; width: 20px; height: 20px; border: 0; border-radius: 50%; background: none; padding: 0;
+  display: grid; place-items: center; opacity: .75;
+}
+.close:hover { background: var(--line); opacity: 1; }
+.close svg { width: 10px; height: 10px; }
+
+/* ---- toolbar ---- */
+#toolbar {
+  height: 42px; display: flex; align-items: center; gap: 2px; padding: 0 8px;
+  background: var(--toolbar); border-bottom: 1px solid var(--line);
+}
+.icon {
+  -webkit-app-region: no-drag;
+  width: 30px; height: 30px; border: 0; border-radius: 50%; background: none;
+  display: grid; place-items: center; flex: none;
+}
+.icon:hover:not(:disabled) { background: var(--tab-hover); }
+.icon:disabled { opacity: .35; }
+svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7;
+      stroke-linecap: round; stroke-linejoin: round; }
+#newtab { margin: 0 0 3px 4px; width: 28px; height: 28px; }
+#reload .x { display: none; }
+#reload.loading .x { display: block; }
+#reload.loading .r { display: none; }
+
+#omnibox-form { flex: 1; display: flex; align-items: center; margin-left: 6px; position: relative; }
+#lock { position: absolute; left: 12px; width: 8px; height: 8px; border-radius: 50%; }
+#lock.secure { background: #2da44e; }
+#lock.insecure { background: #d29922; }
+#omnibox {
+  width: 100%; height: 32px; border: 1px solid transparent; border-radius: 16px; outline: none;
+  padding: 0 14px 0 28px; font: 13.5px inherit; font-family: inherit; color: var(--text);
+  background: var(--field); user-select: text;
+}
+#omnibox:focus { background: var(--field-focus); border-color: var(--accent); }
+#omnibox::placeholder { color: var(--muted); }
