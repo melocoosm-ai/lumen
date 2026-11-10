@@ -2,6 +2,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('lumen', {
+  platform: process.platform, // 'darwin' | 'win32' | 'linux': picks window-control layout and shortcut labels
   newTab: () => ipcRenderer.send('tab:new'),
   closeTab: (id) => ipcRenderer.send('tab:close', id),
   activateTab: (id) => ipcRenderer.send('tab:activate', id),

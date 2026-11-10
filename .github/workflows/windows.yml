@@ -1,0 +1,75 @@
+# Builds Lumen for Windows: an MSIX/AppX package for the Microsoft Store and an installer (.exe)
+# for direct download. AppX packaging needs Windows, so this runs on a GitHub-hosted Windows runner.
+#
+# Store identity: set these repository variables (Settings → Secrets and variables → Actions →
+# Variables) to the values Partner Center shows under Product identity. Without them the
+# package uses a placeholder identity, which installs locally but the Store will reject.
+#   MS_STORE_IDENTITY_NAME        e.g. 12345Melocoosm.Lumen
+#   MS_STORE_PUBLISHER            e.g. CN=1A2B3C4D-....
+#   MS_STORE_PUBLISHER_NAME       e.g. melocoosm-ai
+name: Windows build
+
+on:
+  push:
+    branches: [main, windows-store]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    name: Smoke test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run the app and drive the toolbar
+        run: npm test -- dist/test-shots
+        timeout-minutes: 5
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: smoke-test-screenshots
+          path: dist/test-shots/*.png
+          if-no-files-found: ignore
+
+  package:
+    name: Package (AppX + installer)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build AppX and NSIS installer
+        shell: bash
+        env:
+          IDENTITY: ${{ vars.MS_STORE_IDENTITY_NAME }}
+          PUBLISHER: ${{ vars.MS_STORE_PUBLISHER }}
+          PUBLISHER_NAME: ${{ vars.MS_STORE_PUBLISHER_NAME }}
+        run: |
+          args=()
+          if [ -n "$IDENTITY" ]; then
+            args+=("-c.appx.identityName=$IDENTITY" "-c.appx.publisher=$PUBLISHER")
+            [ -n "$PUBLISHER_NAME" ] && args+=("-c.appx.publisherDisplayName=$PUBLISHER_NAME")
+            echo "Using Partner Center identity $IDENTITY"
+          else
+            echo "::warning::MS_STORE_* variables not set; building with the placeholder identity (not accepted by the Store)."
+          fi
+          npx electron-builder --win appx nsis --x64 --arm64 --publish never "${args[@]}"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: lumen-windows
+          path: |
+            dist/*.appx
+            dist/*.exe
+          if-no-files-found: error

@@ -32,10 +32,19 @@ button { font: inherit; color: inherit; }
 
 /* ---- tab strip (draggable title bar) ---- */
 #tabstrip {
-  height: 38px; display: flex; align-items: flex-end; padding: 0 8px 0 80px;
+  height: 38px; display: flex; align-items: flex-end; padding: 0 8px;
   -webkit-app-region: drag;
 }
-#tabs { display: flex; min-width: 0; flex: 0 1 auto; height: 32px; }
+/* macOS: leave room for the traffic-light buttons on the left. */
+html[data-platform="darwin"] #tabstrip { padding-left: 80px; }
+/* Windows/Linux: the system's minimize/maximize/close buttons sit over the right end. */
+html:not([data-platform="darwin"]) #tabstrip { padding-right: 146px; }
+#tabs {
+  display: flex; min-width: 0; flex: 0 1 auto; height: 32px;
+  /* Many tabs: scroll sideways instead of spilling under the window buttons. */
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+#tabs::-webkit-scrollbar { display: none; }
 .tab {
   -webkit-app-region: no-drag;
   position: relative; display: flex; align-items: center; gap: 8px;

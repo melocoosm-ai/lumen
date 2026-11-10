@@ -6,9 +6,11 @@ const assert = require('node:assert/strict');
 const { app } = require('electron');
 // Headless/CI shells often have no GPU; software compositing keeps capturePage working.
 app.disableHardwareAcceleration();
+process.env.LUMEN_TEST = '1'; // run alongside a normal Lumen window instead of handing off to it
 const lumen = require('../main.js');
 
 const outDir = process.argv.find((a, i) => i > 1 && !a.startsWith('-') && !a.endsWith('.js')) || __dirname;
+fs.mkdirSync(outDir, { recursive: true });
 const t = lumen._test;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function until(fn, ms = 15000) {
@@ -48,6 +50,18 @@ app.whenReady().then(async () => {
     assert.equal(s.tabs[0].url, '', 'first tab is the new-tab page');
     await shot('1-newtab');
     console.log('ok  window opens with one new tab');
+
+    // Window controls: macOS traffic lights on the left; Windows/Linux caption buttons on the right.
+    const layout = await ui(`(() => { const s = getComputedStyle(document.getElementById('tabstrip'));
+      return { platform: document.documentElement.dataset.platform, left: s.paddingLeft, right: s.paddingRight,
+               hint: document.getElementById('newtab').title }; })()`);
+    assert.equal(layout.platform, process.platform);
+    if (process.platform === 'darwin') {
+      assert.deepEqual([layout.left, layout.right, layout.hint], ['80px', '8px', 'New tab (⌘T)']);
+    } else {
+      assert.deepEqual([layout.left, layout.right, layout.hint], ['8px', '146px', 'New tab (Ctrl+T)']);
+    }
+    console.log(`ok  ${process.platform} window-control layout and shortcut hints`);
 
     // 2. Type a URL into the omnibox and submit, like a user.
     await ui(`(() => { const o = document.getElementById('omnibox'); o.value = 'example.com';

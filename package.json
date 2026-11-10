@@ -6,10 +6,56 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "electron tests/smoke.js"
+    "test": "electron tests/smoke.js",
+    "dist:win": "electron-builder --win appx nsis --x64 --arm64",
+    "pack:win": "electron-builder --win dir --x64"
   },
   "license": "MIT",
   "devDependencies": {
-    "electron": "^45.2.3"
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "author": "melocoosm-ai",
+  "homepage": "https://github.com/melocoosm-ai/lumen",
+  "build": {
+    "appId": "io.github.melocoosmai.lumen",
+    "productName": "Lumen",
+    "copyright": "Copyright \u00a9 2026 melocoosm-ai",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "ui/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "appx",
+        "nsis"
+      ]
+    },
+    "appx": {
+      "identityName": "Lumen.Dev",
+      "publisher": "CN=Lumen Dev",
+      "publisherDisplayName": "melocoosm-ai",
+      "applicationId": "Lumen",
+      "displayName": "Lumen",
+      "backgroundColor": "#1c1a33",
+      "showNameOnTiles": true,
+      "languages": [
+        "en-US"
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    }
   }
 }

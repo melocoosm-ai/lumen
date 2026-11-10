@@ -30,3 +30,15 @@ npm start
 ```
 
 `npm test` runs `tests/smoke.js`, which starts the real app and drives the toolbar.
+
+## Windows
+
+On Windows, Lumen draws its own tab strip and keeps the system minimize, maximize and close buttons
+(`titleBarOverlay`). Their colours follow the Windows light/dark theme, and shortcut hints read Ctrl
+instead of ⌘. Launching Lumen again with a URL opens it as a tab in the running window.
+
+- `npm run pack:win` builds an unpacked Windows app folder (works on macOS too).
+- `npm run dist:win` builds the Microsoft Store package (`.appx`) and an installer (`.exe`). Run it on
+  Windows; [the Windows build workflow](.github/workflows/windows.yml) does this on GitHub.
+
+Publishing steps are in [WINDOWS_STORE.md](WINDOWS_STORE.md). Privacy policy: [PRIVACY.md](PRIVACY.md).

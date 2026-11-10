@@ -1,5 +1,10 @@
 // Toolbar + tab strip renderer. All state lives in the main process; this file only renders it.
 const $ = (id) => document.getElementById(id);
+const isMac = window.lumen.platform === 'darwin';
+document.documentElement.dataset.platform = window.lumen.platform;
+// Shortcut hints use ⌘ in the markup; show Ctrl+ elsewhere.
+const keys = (text) => (isMac ? text : text.replace(/⌘/g, 'Ctrl+'));
+document.querySelectorAll('[title]').forEach((n) => { n.title = keys(n.title); });
 const tabsEl = $('tabs');
 const omnibox = $('omnibox');
 const lock = $('lock');
@@ -41,7 +46,7 @@ function renderTabs() {
     title.textContent = t.title;
 
     const close = el('button', 'close');
-    close.title = 'Close tab (⌘W)';
+    close.title = keys('Close tab (⌘W)');
     close.setAttribute('aria-label', `Close ${t.title}`);
     close.appendChild(closeIcon());
     close.addEventListener('click', (e) => { e.stopPropagation(); window.lumen.closeTab(t.id); });
@@ -55,12 +60,16 @@ function renderTabs() {
   }));
 }
 
+function keepActiveTabVisible() {
+  tabsEl.querySelector('.tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
 function renderToolbar() {
   const t = state.tabs.find((x) => x.id === state.activeId);
   $('back').disabled = !t?.canGoBack;
   $('forward').disabled = !t?.canGoForward;
   $('reload').classList.toggle('loading', !!t?.loading);
-  $('reload').title = t?.loading ? 'Stop' : 'Reload (⌘R)';
+  $('reload').title = t?.loading ? 'Stop' : keys('Reload (⌘R)');
   if (!editing) omnibox.value = t?.url || '';
   const url = t?.url || '';
   lock.className = url.startsWith('https:') ? 'secure' : url.startsWith('http:') ? 'insecure' : '';
@@ -73,11 +82,17 @@ function render(next) {
   if (switched) editing = false;
   renderTabs();
   renderToolbar();
+  if (switched) keepActiveTabVisible();
 }
 
 window.lumen.onState(render);
 window.lumen.onFocusOmnibox(() => { omnibox.focus(); omnibox.select(); });
 window.lumen.getState().then(render);
+
+// A normal mouse wheel scrolls the tab strip sideways when it overflows.
+tabsEl.addEventListener('wheel', (e) => {
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { tabsEl.scrollLeft += e.deltaY; e.preventDefault(); }
+}, { passive: false });
 
 $('newtab').addEventListener('click', () => window.lumen.newTab());
 $('back').addEventListener('click', () => window.lumen.back());

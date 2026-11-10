@@ -9,7 +9,10 @@
 // helper processes are spawned the same way Chromium does it.
 
 const path = require('node:path');
-const { app, BaseWindow, WebContentsView, Menu, ipcMain, shell } = require('electron');
+const { app, BaseWindow, WebContentsView, Menu, ipcMain, nativeTheme, shell } = require('electron');
+
+const isMac = process.platform === 'darwin';
+const TABSTRIP_HEIGHT = 38;
 
 const CHROME_HEIGHT = 80; // tab strip (38) + toolbar (42)
 const NEW_TAB_URL = `file://${path.join(__dirname, 'ui', 'newtab.html')}`;
@@ -239,6 +242,20 @@ function zoom(delta) {
 }
 
 // ---------- window ----------
+// Colors of the Windows/Linux caption buttons, matched to the tab strip in ui/ui.css.
+function titleBarOverlay() {
+  return nativeTheme.shouldUseDarkColors
+    ? { color: '#1b1d22', symbolColor: '#e8eaed', height: TABSTRIP_HEIGHT }
+    : { color: '#dfe3e8', symbolColor: '#1f2328', height: TABSTRIP_HEIGHT };
+}
+nativeTheme.on('updated', () => {
+  if (win && !isMac) win.setTitleBarOverlay(titleBarOverlay());
+});
+
+function urlFromArgs(argv) {
+  return argv.find((a) => /^https?:\/\//i.test(a));
+}
+
 function createWindow() {
   win = new BaseWindow({
     width: 1280,
@@ -246,8 +263,11 @@ function createWindow() {
     minWidth: 480,
     minHeight: 300,
     title: 'Lumen',
-    titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 14, y: 13 },
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#1b1d22' : '#dfe3e8',
+    ...(isMac
+      ? { titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 14, y: 13 } }
+      // Windows/Linux: draw our own tab strip, but keep the system's minimize/maximize/close buttons.
+      : { titleBarStyle: 'hidden', titleBarOverlay: titleBarOverlay() }),
   });
 
   uiView = new WebContentsView({
@@ -267,18 +287,33 @@ function createWindow() {
   win.on('closed', () => { tabs.clear(); order = []; win = null; });
 
   uiView.webContents.once('did-finish-load', () => {
-    createTab(process.argv.find((a) => /^https?:\/\//.test(a)) || NEW_TAB_URL);
+    createTab(urlFromArgs(process.argv) || NEW_TAB_URL);
   });
   layout();
 }
 
 app.setName('Lumen');
+
+// One Lumen process per user: launching it again (e.g. from the Start menu or with a URL)
+// focuses the existing window and opens the URL as a new tab. Tests run their own instance.
+if (!process.env.LUMEN_TEST && !app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', (_e, argv) => {
+    if (!win) { createWindow(); return; }
+    if (win.isMinimized()) win.restore();
+    win.focus();
+    const url = urlFromArgs(argv);
+    if (url) createTab(url);
+  });
+}
+
 app.whenReady().then(() => {
   buildMenu();
   createWindow();
   app.on('activate', () => { if (!win) createWindow(); });
 });
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('window-all-closed', () => { if (!isMac) app.quit(); });
 
 // Hooks for tests/smoke.js; not used by the app itself.
 module.exports = {
