@@ -45,6 +45,8 @@
       "applicationId": "Lumen",
       "displayName": "Lumen",
       "backgroundColor": "#1c1a33",
+      "minVersion": "10.0.17763.0",
+      "maxVersionTested": "10.0.26100.0",
       "showNameOnTiles": true,
       "languages": [
         "en-US"
